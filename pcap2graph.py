@@ -1,6 +1,6 @@
-from argparse import ArgumentParser, FileType
+from argparse import ArgumentParser, Namespace
 from sys import argv, stdin
-from typing import Dict, Set
+from typing import Dict, List, Set
 
 from scapy.all import Packet, PacketList, rdpcap
 
@@ -82,7 +82,15 @@ def save_md_to_file(markdown: str, output_file: str):
         f.write(markdown)
 
 
-def parse_args(argv=None):
+def parse_args(argv: List[str] | None = None) -> Namespace:
+    """Parse command line arguments
+
+    Args:
+        argv (List[str] | None, optional): List of command line arguments. Defaults to None.
+
+    Returns:
+        Namespace: Namespace object containing the argument values.
+    """
     parser = ArgumentParser()
     parser.add_argument(
         "--input",
