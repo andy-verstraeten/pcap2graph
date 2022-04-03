@@ -1,5 +1,5 @@
-from sqlite3 import connect
-from sys import argv
+from argparse import ArgumentParser, FileType
+from sys import argv, stdin
 from typing import Dict, Set
 
 from scapy.all import Packet, PacketList, rdpcap
@@ -82,8 +82,30 @@ def save_md_to_file(markdown: str, output_file: str):
         f.write(markdown)
 
 
+def parse_args(argv=None):
+    parser = ArgumentParser()
+    parser.add_argument(
+        "--input",
+        "-i",
+        type=str,
+        default=stdin,
+        metavar="PATH",
+        help="Input pcap file.",
+    )
+    parser.add_argument(
+        "--output",
+        "-o",
+        type=str,
+        default=stdin,
+        metavar="PATH",
+        help="Path to output markdown file(.md).",
+    )
+    return parser.parse_args(argv)
+
+
 if __name__ == "__main__":
-    packets = load_pcap(argv[1])
+    args = parse_args(argv[1:])
+    packets = load_pcap(args.input)
     connections = map_unique_ip_connections(packets)
     markdown = generate_markdown(connections)
-    save_md_to_file(markdown, argv[2])
+    save_md_to_file(markdown, args.output)

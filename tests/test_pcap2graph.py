@@ -10,6 +10,20 @@ sys.path.insert(1, p)
 from pcap2graph import *
 
 
+def test_parse_args_input_file_i_flag():
+    """Test to see if -i flag with input file works correctly"""
+    filename = "/Users/andyverstraeten/Downloads/pcaps/nitroba.pcap"
+    args = parse_args(["-i", filename])
+    assert args.input == filename
+
+
+def test_parse_args_output_file_o_flag():
+    """Test to see if -i flag with input file works correctly"""
+    filename = "/Users/andyverstraeten/Downloads/pcaps/nitroba.pcap"
+    args = parse_args(["-o", filename])
+    assert args.output == filename
+
+
 def test_generate_connections_markdown():
     test_connections = {"1.1.1.1": ("2.2.2.2", "3.3.3.3")}
     expected_output = "1.1.1.1---2.2.2.2\n1.1.1.1---3.3.3.3"
