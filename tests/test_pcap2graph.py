@@ -1,7 +1,7 @@
 import os
 import sys
 
-from scapy.all import Packet
+from scapy.all import IP
 
 p = os.path.abspath(".")
 sys.path.insert(1, p)
@@ -35,7 +35,7 @@ def test_generate_markdown():
     test_connections = {"1.1.1.1": ("2.2.2.2", "3.3.3.3")}
     expected_output = """
 ```mermaid
-graph TB
+graph LR
 1.1.1.1---2.2.2.2
 1.1.1.1---3.3.3.3
 """
@@ -44,7 +44,7 @@ graph TB
 
 
 def create_packet_mock(src, dst):
-    packet = Packet()
+    packet = IP()
     packet.src = "1.1.1.1"
     packet.dst = "2.2.2.2"
     return packet

@@ -2,7 +2,7 @@ from argparse import ArgumentParser, Namespace
 from sys import argv, stdin
 from typing import Dict, List, Set
 
-from scapy.all import Packet, PacketList, rdpcap
+from scapy.all import IP, Packet, PacketList, ls, rdpcap
 
 
 def load_pcap(filename: str) -> PacketList:
@@ -29,12 +29,14 @@ def map_unique_ip_connections(packets: PacketList) -> dict:
     """
     src_ips: Dict[str, Set] = {}
     for p in packets:
-        if p.src in src_ips:
-            src_ips[p.src].add(p.dst)
-        elif p.dst in src_ips:
-            src_ips[p.dst].add(p.src)
+        if IP not in p:
+            continue
+        if p[IP].src in src_ips:
+            src_ips[p[IP].src].add(p[IP].dst)
+        elif p[IP].dst in src_ips:
+            src_ips[p[IP].dst].add(p[IP].src)
         else:
-            src_ips[p.src] = {p.dst}
+            src_ips[p[IP].src] = {p[IP].dst}
     return src_ips
 
 
@@ -66,7 +68,7 @@ def generate_markdown(connections: dict) -> str:
     connection_md = generate_connections_markdown(connections)
     return f"""
 ```mermaid
-graph TB
+graph LR
 {connection_md}
 """
 
