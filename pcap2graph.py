@@ -2,7 +2,8 @@ from argparse import ArgumentParser, Namespace
 from sys import argv, stdin
 from typing import Dict, List, Set
 
-from scapy.all import IP, Packet, PacketList, ls, rdpcap
+import scapy.all
+from scapy.all import IP, PacketList
 
 
 def load_pcap(filename: str) -> PacketList:
@@ -14,7 +15,7 @@ def load_pcap(filename: str) -> PacketList:
     Returns:
         PacketList: a list of Scapy packets
     """
-    packets = rdpcap(filename)
+    packets = scapy.all.rdpcap(filename)
     return packets
 
 
@@ -113,9 +114,27 @@ def parse_args(argv: List[str] | None = None) -> Namespace:
     return parser.parse_args(argv)
 
 
-if __name__ == "__main__":
-    args = parse_args(argv[1:])
-    packets = load_pcap(args.input)
+def pcap2graph(input_path: str, output_path: str):
+    """Main function loading the pcap, generating markdown and saving.
+    In case of common errors halts program and prints the problem.
+
+    Args:
+        input_path (str): Path to input pcap file.
+        output_path (str): Path to output md file.
+    """
+    try:
+        packets = load_pcap(input_path)
+    except FileNotFoundError:
+        print("Input file does not exist.")
+        return
+    except scapy.all.Scapy_Exception:
+        print("Input file does not seem to be a valid pcap.")
+        return
     connections = map_unique_ip_connections(packets)
     markdown = generate_markdown(connections)
-    save_md_to_file(markdown, args.output)
+    save_md_to_file(markdown, output_path)
+
+
+if __name__ == "__main__":
+    args = parse_args(argv[1:])
+    pcap2graph(input_path=args.input, output_path=args.output)

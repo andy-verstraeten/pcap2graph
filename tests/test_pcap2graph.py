@@ -1,13 +1,39 @@
 import os
 import sys
 
-from scapy.all import IP
+import pytest
+import scapy.all
 
 p = os.path.abspath(".")
 sys.path.insert(1, p)
 
 
 from pcap2graph import *
+
+
+def test_pcap2graph_input_file_nonexistant(capsys, monkeypatch):
+    """Test if correct message is shown when file is not found."""
+
+    def raise_file_not_found_error(file):
+        raise FileNotFoundError
+
+    monkeypatch.setattr(scapy.all, "rdpcap", raise_file_not_found_error)
+    pcap2graph("/not_existant_file.pcap", "output.md")
+    captured = capsys.readouterr()
+    assert captured.out == "Input file does not exist.\n"
+
+
+def test_pcap2graph_input_file_scapy_error(capsys, monkeypatch):
+    """Test correct response when input file is not a pcap and raises SyntaxError"""
+
+    def raise_scapy_error(*args, **kwargs):
+        raise scapy.all.Scapy_Exception
+
+    monkeypatch.setattr(scapy.all, "rdpcap", raise_scapy_error)
+
+    pcap2graph("/not_a_pcap.pcap", "output.md")
+    captured = capsys.readouterr()
+    assert captured.out == "Input file does not seem to be a valid pcap.\n"
 
 
 def test_parse_args_input_file_i_flag():
@@ -22,6 +48,15 @@ def test_parse_args_output_file_o_flag():
     filename = "/Users/andyverstraeten/Downloads/pcaps/nitroba.pcap"
     args = parse_args(["-o", filename])
     assert args.output == filename
+
+
+"""
+def test_load_pcap_file_not_exist(capsys, tmp_path):
+    path = os.path.join(tmp_path, "not_exist.pcap")
+    load_pcap(path)
+    captured = capsys.readouterr()
+    assert captured.out == "Input file does not exist.\n"
+"""
 
 
 def test_generate_connections_markdown():
